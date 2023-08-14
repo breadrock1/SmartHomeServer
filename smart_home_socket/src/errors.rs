@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+pub type SocketResult = Result<String, SocketError>;
+
 #[derive(Debug, Error)]
 pub enum SocketError {
     #[error("Failed while switching socket")]
@@ -14,7 +16,7 @@ pub enum SocketError {
     PowerError(String),
 }
 
-pub type SocketResult = Result<String, SocketError>;
+pub type ThermometerResult = Result<String, ThermometerError>;
 
 #[derive(Debug, Error)]
 pub enum ThermometerError {
@@ -24,5 +26,5 @@ pub enum ThermometerError {
     SetupError(String),
 }
 
-pub type ThermometerResult = Result<String, ThermometerError>;
+pub type TcpResult = Result<(), ThermometerError>;
 pub type UdpResult = Result<(), ThermometerError>;
