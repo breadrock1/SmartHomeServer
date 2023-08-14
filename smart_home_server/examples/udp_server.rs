@@ -1,51 +1,55 @@
-use rand::{thread_rng, Rng};
-use std::net::UdpSocket;
-use std::thread;
+use smart_home_server::errors::HandleResult;
+use std::thread::sleep;
 use std::time::Duration;
+use tokio::net::UdpSocket;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let address = String::from("[::]:2000");
-    let server = UdpSocket::bind(address).unwrap();
-    let duration = Duration::new(5, 0);
-    server.set_read_timeout(Some(duration)).unwrap();
+    let server = UdpSocket::bind(address).await.unwrap();
 
-    let f_th = thread::spawn(move || launch_thermometer());
-    let s_th = thread::spawn(move || bind_udp_datagrams(server));
-
-    let _ = f_th.join();
-    let _ = s_th.join();
+    tokio::spawn(async move {
+        let _ = launch_thermometer().await;
+    });
+    tokio::spawn(async move {
+        let _ = bind_udp_datagrams(server).await;
+    });
 }
 
-fn bind_udp_datagrams(server: UdpSocket) {
+async fn bind_udp_datagrams(server: UdpSocket) -> HandleResult {
     let mut buf = [0, 128];
     let timeout = Duration::from_secs(2);
 
     loop {
-        if let Ok((l, a)) = server.recv_from(&mut buf) {
+        if let Ok((l, a)) = server.recv_from(&mut buf).await {
             let received_str = String::from_utf8_lossy(&buf);
             println!("{} bytes receiver from {}", l, a);
             println!("Received data {}", received_str);
         };
 
-        thread::sleep(timeout);
+        sleep(timeout);
     }
 }
 
-fn launch_thermometer() {
+async fn launch_thermometer() -> HandleResult {
     let bind_address = "[::]:0";
-    let udp_client = UdpSocket::bind(bind_address).expect("Can't establish connect");
+    let udp_client = UdpSocket::bind(bind_address)
+        .await
+        .expect("Can't establish connect");
 
-    let mut rng = thread_rng();
     let target_address = "localhost:2000";
     let timeout = Duration::from_secs(2);
 
     loop {
-        let gen_temp_value: i32 = rng.gen_range(20..300);
-        let gen_temp_str = &gen_temp_value.to_string();
-        if let Err(e) = udp_client.send_to(gen_temp_str.as_bytes(), target_address) {
+        let rng = rand::random::<i32>();
+        let gen_temp_str = &rng.to_string();
+        if let Err(e) = udp_client
+            .send_to(gen_temp_str.as_bytes(), target_address)
+            .await
+        {
             println!("Failed while sending datagram: {}", e);
         };
 
-        thread::sleep(timeout);
+        sleep(timeout);
     }
 }

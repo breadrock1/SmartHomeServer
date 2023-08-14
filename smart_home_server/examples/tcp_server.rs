@@ -33,27 +33,27 @@ async fn main() {
             }
         });
     }
+}
 
-    async fn handle_connection(mut connection: TcpStream, room: Room) -> HandleResult {
-        let mut handler = RequestHandler::new(room);
-        loop {
-            let input_string = match recv_request(&mut connection).await {
-                Ok(s) => s,
-                Err(e) => {
-                    println!("Failed while reading request: {}", e);
-                    return Err(ConnectError::Other(e.to_string()));
-                }
-            };
+async fn handle_connection(mut connection: TcpStream, room: Room) -> HandleResult {
+    let mut handler = RequestHandler::new(room);
+    loop {
+        let input_string = match recv_request(&mut connection).await {
+            Ok(s) => s,
+            Err(e) => {
+                println!("Failed while reading request: {}", e);
+                return Err(ConnectError::Other(e.to_string()));
+            }
+        };
 
-            let request = Request::new(input_string.as_str());
-            let handler_status = handler.handle(request);
-            match send_request(&mut connection, handler_status).await {
-                Ok(s) => println!("{}", s),
-                Err(e) => {
-                    println!("Failed while writing response: {}", e);
-                    return Err(ConnectError::Other(e.to_string()));
-                }
-            };
-        }
+        let request = Request::new(input_string.as_str());
+        let handler_status = handler.handle(request);
+        match send_request(&mut connection, handler_status).await {
+            Ok(s) => println!("{}", s),
+            Err(e) => {
+                println!("Failed while writing response: {}", e);
+                return Err(ConnectError::Other(e.to_string()));
+            }
+        };
     }
 }

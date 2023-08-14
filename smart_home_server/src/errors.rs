@@ -1,6 +1,7 @@
 use std::io;
 use thiserror::Error;
 
+pub type HandleResult = Result<(), ConnectError>;
 pub type ConnectResult<T> = Result<T, ConnectError>;
 
 #[derive(Debug, Error)]

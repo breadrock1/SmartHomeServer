@@ -11,3 +11,7 @@ dashmap = "4.0.2"
 rand = "0.8.5"
 thiserror = "1.0.30"
 smart_home_socket = { path = "../smart_home_socket" }
+tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros"] }
+
+[dev-dependencies]
+tokio = { version = "1.15.0", features = ["net", "macros", "rt-multi-thread", "io-util"] }
