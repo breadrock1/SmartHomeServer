@@ -1,14 +1,13 @@
 [package]
-name = "smart_home_server"
+name = "smart_home_socket_c"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
-anyhow = "1.0.51"
-dashmap = "4.0.2"
-rand = "0.8.5"
-thiserror = "1.0.30"
+libloading = "0.8.0"
 smart_home_socket = { path = "../smart_home_socket" }
-tokio = { version = "1.15.0", features = ["net", "macros", "rt-multi-thread", "io-util"] }

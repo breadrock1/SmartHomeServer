@@ -1,5 +1,6 @@
 use smart_home_server::errors::*;
 use smart_home_server::handlers::*;
+use smart_home_server::{recv_request_async, send_request_async};
 use smart_home_socket::room::*;
 use tokio::net::{TcpListener, TcpStream};
 
@@ -38,7 +39,7 @@ async fn main() {
 async fn handle_connection(mut connection: TcpStream, room: Room) -> HandleResult {
     let mut handler = RequestHandler::new(room);
     loop {
-        let input_string = match recv_request(&mut connection).await {
+        let input_string = match recv_request_async(&mut connection).await {
             Ok(s) => s,
             Err(e) => {
                 println!("Failed while reading request: {}", e);
@@ -48,7 +49,7 @@ async fn handle_connection(mut connection: TcpStream, room: Room) -> HandleResul
 
         let request = Request::new(input_string.as_str());
         let handler_status = handler.handle(request);
-        match send_request(&mut connection, handler_status).await {
+        match send_request_async(&mut connection, handler_status).await {
             Ok(s) => println!("{}", s),
             Err(e) => {
                 println!("Failed while writing response: {}", e);
