@@ -98,6 +98,25 @@ impl Room {
             }
         }
     }
+
+    pub fn sockets_iter(&self) -> impl Iterator<Item = String> {
+        let socket_names: Vec<String> = self
+            .sockets
+            .as_ref()
+            .clone()
+            .into_iter()
+            .map(|(l, _)| l)
+            .collect();
+
+        socket_names.into_iter()
+    }
+
+    pub fn get_socket(&self, name: String) -> Option<Socket> {
+        match self.sockets.entry(name) {
+            Entry::Occupied(s) => Some(s.get().clone()),
+            Entry::Vacant(_) => None,
+        }
+    }
 }
 
 #[cfg(test)]
